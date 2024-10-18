@@ -27,6 +27,7 @@ app.use(cookieParser("palabrasecreta"))
 initializePassport()
 app.use(passport.initialize())
 
+
 //PERSISTENCIA DE SESSION CON FILESTORE
 /* const fileStore = new FileStore(session)
 
@@ -43,7 +44,7 @@ app.use(session({
 
 //PERSISTENCIA DE SESSION CON DB MONGO
 
-/* app.use(session({
+app.use(session({
     store: MongoStore.create({
         mongoUrl: "mongodb+srv://ecommerce:1234@cluster0.tlsjd.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0",
         ttl: 100000
@@ -53,7 +54,7 @@ app.use(session({
     saveUninitialized: true
 }))
 
-app.use(passport.session()) */
+app.use(passport.session())
 
 app.engine("handlebars", engine({
     runtimeOptions: {

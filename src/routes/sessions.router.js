@@ -10,7 +10,7 @@ export const router = Router()
 
 //REGISTER Y LOGIN CON PASSPORT
 
-/* router.post("/register", passport.authenticate("register", {failureRedirect: "/failRegister"}), async(req, res) =>{
+router.post("/register", passport.authenticate("register", {failureRedirect: "/failRegister"}), async(req, res) =>{
     console.log("se registro")
     res.send({status: "succes", message: "Registro completado."})
 })
@@ -22,23 +22,31 @@ router.get("/failRegister", async(req, res) =>{
 
 router.post("/login", passport.authenticate("login" ,{failureRedirect: "/failedLogin"}), async(req, res) =>{
     if(!req.user) return res.status(401).send({error: "Credenciales invalidas."})
+
+    const userFound = await UsersManager.getUser({email: req.user.email})
+
+    if(!userFound){
+        return res.status(401).send({status: "error", error: "User not found."})
+    }
     
-    req.session.user = {
+    /* req.session.user = {
         first_name: req.user.first_name,
         last_name: req.user.last_name,
         email: req.user.email,
-    }
+    } */
 
-    res.status(200).send("Logueado exitosamente.")
+    const token = generateToken({id: userFound._id, role: userFound.role})
+
+    res.cookie("token", token, {
+        maxAge: 1000 * 60 * 60 * 24,
+        httpOnly: true
+    }).status(200).send({status: "succes", data: userFound, token})
 })
 router.get("/failedLogin", async(req, res) =>{
     console.log("Fallo la estrategia")
     res.send({status: "error", error: "Fallo estrategia."})
-}) */
+})
 
-/* router.get("/current", passport.authenticate("current", {session: false}), (req, res) => {
-    res.send({dataUser: req.user, message: "datos sensibles"})
-}) */
 
 router.get("/current", passportCall("current"), (req, res) => {
     res.send({dataUser: req.user, message: "datos sensibles"})
@@ -51,21 +59,19 @@ router.get("/logout", (req, res) => {
 
 router.post("/changepass", async(req, res) => {
     const { email, newPassword } = req.body
-
-    console.log(email, newPassword)
-
+    
     if(!email || !newPassword){
         return res.status(401).send({error: `Los campos email y contrañea nueva son obligatorios.`})
     }
-
+    
     const userFound = await UsersManager.getUser({email})
-
+    
     if(!userFound){
         return res.status(401).send({error: `El usuario no existe.`})
     }
-
+    
     const passwordChanged = {password: createHash(newPassword)}
-
+    
     try {
         const result = await UsersManager.updateUser({email}, passwordChanged)
         res.status(200).send(`Contraseña cambiada con exito.`)
@@ -79,19 +85,28 @@ router.post("/changepass", async(req, res) => {
     }
 })
 
-router.post("/register", async(req, res) => {
-    const {first_name, last_name, email, password, age, cart, role} = req.body
+/* router.get("/current", passport.authenticate("current", {session: false}), (req, res) => {
+    res.send({dataUser: req.user, message: "datos sensibles"})
+}) */
 
+
+    
+
+//REGISTER Y LOGIN SIN PASSPORT
+
+/* router.post("/register", async(req, res) => {
+    const {first_name, last_name, email, password, age, cart, role} = req.body
+    
     if(!email || !password){
         return res.status(400).send({status: "error", error: "Email y password son obligatorios."})
     }
-
+    
     const userFound = await UsersManager.getUser({email})
-
+    
     if(userFound){
         return res. status(401).send({status: "error", error: "El email ya se encuentra registrado."})
     }
-
+    
     const newUser = {
         first_name,
         last_name,
@@ -101,7 +116,7 @@ router.post("/register", async(req, res) => {
         cart,
         role
     }
-
+    
     try {
         const result = await UsersManager.createUser(newUser)
         res.status(200).send("Usuario registrado con exito.")
@@ -115,25 +130,26 @@ router.post("/register", async(req, res) => {
 
 router.post("/login", async(req, res) => {
     const { email, password } = req.body
-
+    
     const userFound = await UsersManager.getUser({email})
-
+    
     if(!userFound || !isValidPassword(userFound.password, password)){
         return res.status(401).send({status: "error", error: "Credenciales incorrectas."})
     }
-
-    /* req.session.user = {
+    
+    req.session.user = {
         email,
         isAdmin: userFound.role === "admin"
-    }  */
-
+    } 
+    
     const token = generateToken({id: userFound._id, role: userFound.role})
-
+    
     res.cookie("token", token, {
         maxAge: 1000 * 60 * 60 * 24,
         httpOnly: true
     }).send({status: "succes", data: userFound, token})
-})
+}) */
+
 
 
 

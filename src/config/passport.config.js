@@ -6,7 +6,7 @@ import {PRIVATE_KEY} from "../utils/jsonwebtoken.js"
 import { UsersManager } from "../dao/UsersManager.MongoDB.js"
 import { createHash, isValidPassword } from "../utils/bcrypt.js"
 
-/* const LocalStrategy = passportLocal.Strategy */
+const LocalStrategy = passportLocal.Strategy
 
 const JWTStrategy = jwt.Strategy
 const ExtractJWT = jwt.ExtractJwt
@@ -33,7 +33,7 @@ export const initializePassport = () => {
         }
     }))
 
-    /* passport.use("register", new LocalStrategy({
+    passport.use("register", new LocalStrategy({
         passReqToCallback: true,
         usernameField: "email"
     }, async(req, username, password, done) => {
@@ -57,7 +57,6 @@ export const initializePassport = () => {
             }
 
             let result = await UsersManager.createUser(newUser)
-            console.log(result)
             return done(null, result)
         } catch (error) {
             return done("Error al crear usuario " + error)
@@ -69,9 +68,9 @@ export const initializePassport = () => {
     }, async(username, password, done) => {
         try {
             let userFound = await UsersManager.getUser({email: username})
-
+            
             if(!userFound || !isValidPassword(userFound.password, password)) return done("Credenciales incorrectas", false)
-
+                
             return done(null, userFound)
         } catch (error) {
             return done(error)
@@ -84,5 +83,5 @@ export const initializePassport = () => {
     passport.deserializeUser( async(id, done) => {
         let user = await UsersManager.getUser({_id: id})
         if(user) return done(null, user)
-    }) */
+    })
 }

@@ -92,7 +92,7 @@ router.get("/login", async(req, res) => {
     res.status(200).render("login", {})
 })
 
-router.get("/newpass", async(req, res) => {
+router.get("/changepass", async(req, res) => {
     res.setHeader("Content-Type", "text/html")
     res.status(200).render("changePass", {})
 })
