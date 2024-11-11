@@ -16,6 +16,7 @@ import { initializePassport } from "./config/passport.config.js"
 import { UserRouter } from "./routes/userClass.router.js"
 import { ProductRouter } from "./routes/productClass.router.js"
 import { CartRouter } from "./routes/cartsClass.router.js"
+import { TicketRouter } from "./routes/ticketClass.router.js"
 // import FileStore from "session-file-store"
 
 const PORT = 8080
@@ -72,6 +73,7 @@ app.set("views", "./src/views")
 const userRouter = new UserRouter()
 const productRouter = new ProductRouter()
 const cartRouter = new CartRouter()
+const ticketRouter = new TicketRouter()
 
 app.use("/api/sessions/",
     (req, res, next) => {
@@ -100,6 +102,13 @@ app.use("/api/carts/",
         next()
     },
     cartRouter.getRouter())
+
+app.use("/api/tickets/",
+    (req, res, next) => {
+        req.io=io
+        next()
+    },
+    ticketRouter.getRouter())
 
 app.use("/",
     (req, res, next) => {

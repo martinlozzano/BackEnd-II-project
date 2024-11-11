@@ -1,8 +1,8 @@
-import { userModel } from "./models/usersModel.js"
+import { ticketModel } from "./models/ticketModel.js"
 
-export class UsersDaoMongo {
+export class TicketsDaoMongo {
     constructor(){
-        this.model = userModel
+        this.model = ticketModel
     }
     async get() {
         return await this.model.find()
@@ -12,8 +12,8 @@ export class UsersDaoMongo {
         return await this.model.findOne(filter)
     }
 
-    async create(newUser) {
-        return await this.model.create(newUser)
+    async create(newTicket) {
+        return await this.model.create(newTicket)
     }
 
     async update(filter, dataToUpdate) {

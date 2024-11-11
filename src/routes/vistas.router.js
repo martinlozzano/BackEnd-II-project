@@ -4,8 +4,11 @@ import { CartsDaoMongo } from "../dao/CartsDao.MongoDB.js"
 import { isValidObjectId } from "mongoose"
 export const router = Router()
 
+const cartDaoMongo = new CartsDaoMongo()
+const productDaoMongo = new ProductsDaoMongo()
+
 router.get("/products", async(req, res) => {
-    const cart = await CartsDaoMongo.getProductsFromCart("66ec2a6c4df6736b5255b97c")
+    const cart = await cartDaoMongo.getProductsFromCart("66ec2a6c4df6736b5255b97c")
 
     let {page, limit, query, sort } = req.query
 
@@ -21,7 +24,7 @@ router.get("/products", async(req, res) => {
         return res.status(400).json({ error: `El argumento limit debe ser de tipo numérico` })
     }
 
-    const products = await ProductsDaoMongo.getProducts(page || 1, limit || 10, sort, query)
+    const products = await productDaoMongo.get(page || 1, limit || 10, sort, query)
 
     if(!products || !products.payload || !cart || !cart.products){
         res.setHeader("Content-Type", "text/html")
@@ -41,7 +44,7 @@ router.get("/products", async(req, res) => {
 })
 
 router.get("/realtimeproducts", async(req, res) => {
-    let products = await ProductsDaoMongo.getProducts()
+    let products = await productDaoMongo.getProducts()
 
     res.setHeader("Content-Type", "text/html")
     res.status(200).render("realTimeProducts", {products: products.payload})
@@ -62,7 +65,7 @@ router.get("/carts/:cid", async(req, res) =>{
     }
 
     try {
-        let cart = await CartsDaoMongo.getCartsById(cid)
+        let cart = await cartDaoMongo.getProductsFromCart(cid)
 
         if(!cart){
             res.setHeader("Content-Type", "application/json")
