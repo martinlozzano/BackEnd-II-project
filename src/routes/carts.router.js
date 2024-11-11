@@ -1,16 +1,16 @@
 import {Router} from "express"
-import { CartsManager } from "../dao/CartsManager.MongoDB.js"
-import { ProductsManager } from "../dao/ProductsManager.MongoDB.js"
+import { CartsDaoMongo } from "../dao/CartsDao.MongoDB.js"
+import { ProductsDaoMongo } from "../dao/ProductsDao.MongoDB.js"
 import { isValidObjectId } from "mongoose"
 
 export const router = Router()
 
-CartsManager.path = "./src/data/carts.json"
+CartsDaoMongo.path = "./src/data/carts.json"
 
 router.get("/", async (req, res) =>{
     let carritos
     try {
-        carritos = await CartsManager.getCarts()
+        carritos = await CartsDaoMongo.getCarts()
     } catch (error) {
         console.log(error)
         res.setHeader("Content-Type", "application/json")
@@ -32,7 +32,7 @@ router.get("/:cid", async (req, res) =>{
     }
 
     try {
-        let carrito = await CartsManager.getCartsById(cid)
+        let carrito = await CartsDaoMongo.getCartsById(cid)
 
         if (!carrito) {
             res.setHeader("Content-Type", "application/json")
@@ -63,7 +63,7 @@ router.get("/:cid", async (req, res) =>{
 
 router.post("/", async (req, res) =>{
     try {
-        let carritoNuevo = await CartsManager.createCart()
+        let carritoNuevo = await CartsDaoMongo.createCart()
         res.setHeader("Content-Type", "application/json")
         return res.status(201).json({carritoNuevo})
     } catch (error) {
@@ -91,7 +91,7 @@ router.post("/:cid/product/:pid", async (req, res) =>{
     
     let productoEncontrado
     try {
-        productoEncontrado = await ProductsManager.getProductsbyId(pid)
+        productoEncontrado = await ProductsDaoMongo.getProductsbyId(pid)
 
         if (!productoEncontrado) {
             res.setHeader("Content-Type", "application/json")
@@ -107,8 +107,8 @@ router.post("/:cid/product/:pid", async (req, res) =>{
     }
 
     try {
-        await CartsManager.addProductToCart(cid, pid)
-        let prodAgregado = await CartsManager.getCartsById(cid)
+        await CartsDaoMongo.addProductToCart(cid, pid)
+        let prodAgregado = await CartsDaoMongo.getCartsById(cid)
         res.setHeader("Content-Type", "application/json")
         return res.status(200).json({prodAgregado})
     } catch (error) {
@@ -135,16 +135,16 @@ router.delete("/:cid/product/:pid", async (req, res) => {
     }
     
     try {
-        let carritoExiste = await CartsManager.getCartsById(cid)
+        let carritoExiste = await CartsDaoMongo.getCartsById(cid)
 
         if(!carritoExiste){
             res.setHeader("Content-Type", "application/json")
             return res.status(400).json({ error: `No existe el carrito con el id solicitado` })
         }
 
-        await CartsManager.deleteProductFromCart(cid, pid)
+        await CartsDaoMongo.deleteProductFromCart(cid, pid)
 
-        let carritoModificado = await CartsManager.getCartsById(cid)
+        let carritoModificado = await CartsDaoMongo.getCartsById(cid)
 
         res.setHeader("Content-Type", "application/json")
         return res.status(200).json({carritoModificado})
@@ -168,16 +168,16 @@ router.delete("/:cid", async(req,res) =>{
     }
 
     try {
-        let carritoExiste = await CartsManager.getCartsById(cid)
+        let carritoExiste = await CartsDaoMongo.getCartsById(cid)
 
         if(!carritoExiste){
             res.setHeader("Content-Type", "application/json")
             return res.status(400).json({ error: `No existe el carrito con el id solicitado` })
         }
 
-        await CartsManager.vaciarCarrito(cid)
+        await CartsDaoMongo.vaciarCarrito(cid)
 
-        let carritoModificado = await CartsManager.getCartsById(cid)
+        let carritoModificado = await CartsDaoMongo.getCartsById(cid)
 
         res.setHeader("Content-Type", "application/json")
         return res.status(200).json({carritoModificado})
@@ -202,9 +202,9 @@ router.put("/:cid", async(req, res)=>{
     }    
 
     try {
-        let productosDB = await ProductsManager.getProducts()
-        await CartsManager.actualizarCarrito(cid, productos, productosDB)
-        let carritoModificado = await CartsManager.getCartsById(cid)
+        let productosDB = await ProductsDaoMongo.getProducts()
+        await CartsDaoMongo.actualizarCarrito(cid, productos, productosDB)
+        let carritoModificado = await CartsDaoMongo.getCartsById(cid)
 
         res.setHeader("Content-Type", "application/json")
         return res.status(200).json({carritoModificado})
@@ -247,8 +247,8 @@ router.put("/:cid/product/:pid", async(req, res)=>{
 
     try {
         
-        await CartsManager.actualizarCantidad(cid, pid, quantity)
-        let carritoModificado = await CartsManager.getCartsById(cid)
+        await CartsDaoMongo.actualizarCantidad(cid, pid, quantity)
+        let carritoModificado = await CartsDaoMongo.getCartsById(cid)
 
         res.setHeader("Content-Type", "application/json")
         return res.status(200).json({carritoModificado})

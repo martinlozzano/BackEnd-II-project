@@ -5,7 +5,7 @@ import { router as productsRouter} from "./routes/products.router.js"
 import { router as cartsRouter} from "./routes/carts.router.js"
 import { router as vistasRouter } from "./routes/vistas.router.js"
 import { router as sessionsRouter } from "./routes/sessions.router.js"
-import { router as usersRouter } from "./routes/users.router.js"
+/* import { router as usersRouter } from "./routes/users.router.js" */
 import { router as pruebasRouter } from "./routes/pruebas.router.js"
 import { connDB } from "./data/connDB.js"
 import cookieParser from "cookie-parser"
@@ -13,6 +13,9 @@ import session from "express-session"
 import MongoStore from "connect-mongo"
 import passport from "passport"
 import { initializePassport } from "./config/passport.config.js"
+import { UserRouter } from "./routes/userClass.router.js"
+import { ProductRouter } from "./routes/productClass.router.js"
+import { CartRouter } from "./routes/cartsClass.router.js"
 // import FileStore from "session-file-store"
 
 const PORT = 8080
@@ -65,31 +68,39 @@ app.engine("handlebars", engine({
 app.set("view engine", "handlebars")
 app.set("views", "./src/views")
 
+
+const userRouter = new UserRouter()
+const productRouter = new ProductRouter()
+const cartRouter = new CartRouter()
+
 app.use("/api/sessions/",
     (req, res, next) => {
         req.io=io
         next()
     }, 
     sessionsRouter)
+
 app.use("/api/users/",
     (req, res, next) => {
         req.io=io
         next()
     }, 
-    usersRouter)
+    userRouter.getRouter())
 
 app.use("/api/products/", 
     (req, res, next) => {
         req.io=io
         next()
     },
-    productsRouter)
+    productRouter.getRouter())
+
 app.use("/api/carts/",
     (req, res, next) => {
         req.io=io
         next()
     },
-    cartsRouter)
+    cartRouter.getRouter())
+
 app.use("/",
     (req, res, next) => {
         req.io=io

@@ -1,7 +1,11 @@
 import { productsModel } from "./models/productsModel.js"
 
-export class ProductsManager {
-    static async getProducts(page = 1, limit = 10, sort, query) {
+export class ProductsDaoMongo {
+    constructor(){
+        this.model = productsModel
+    }
+
+    async get(page = 1, limit = 10, sort, query) {
 
         let ordenamiento = {}
 
@@ -15,7 +19,7 @@ export class ProductsManager {
 
         const filtro = query ? {$expr: {$eq: [{ $toLower: "$category" }, query.toLowerCase()]}} : {}
 
-        const productosPorParams = await productsModel.paginate(filtro, {
+        const productosPorParams = await this.model.paginate(filtro, {
             sort: ordenamiento,
             lean:true,
             page,
@@ -36,19 +40,19 @@ export class ProductsManager {
         }
     }
 
-    static async getProductsbyId(id) {
-        return await productsModel.findById(id).lean()
+    async getBy(id) {
+        return await this.model.findById(id).lean()
     }
 
-    static async addProduct(product = {}) {
-        return await productsModel.create(product)
+    async create(product = {}) {
+        return await this.model.create(product)
     }
 
-    static async updateProduct(pid, camposActualizar) {
-        return await productsModel.findByIdAndUpdate(pid, camposActualizar, {new:true}).lean()
+    async update(pid, camposActualizar) {
+        return await this.model.findByIdAndUpdate(pid, camposActualizar, {new:true}).lean()
     }
 
-    static async deleteProduct(pid){
-        return await productsModel.findByIdAndDelete(pid).lean()
+    async delete(pid){
+        return await this.model.findByIdAndDelete(pid).lean()
     }
 }

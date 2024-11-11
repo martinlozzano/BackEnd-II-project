@@ -1,16 +1,11 @@
 import { Router } from "express"
-import { UsersManager } from "../dao/UsersManager.MongoDB.js"
+import { UsersDaoMongo } from "../dao/UsersDao.MongoDB.js"
 
 export const router = Router()
 
-const midd1 = (req, res, next) => {
-    console.log("middleware")
-    next()
-}
-
-router.get("/", midd1, async(req, res) => {
+router.get("/", async(req, res) => {
     try {
-        const users = await UsersManager.getAllUsers()
+        const users = await UsersDaoMongo.getAllUsers()
         res.status(200).json({users})
         
     } catch (error) {
@@ -26,7 +21,7 @@ router.get("/:uid", async(req, res) => {
     const { uid } = req.params
 
     try {
-        const user = await UsersManager.getUser({_id: uid})
+        const user = await UsersDaoMongo.getUser({_id: uid})
         res.status(200).send({status: "success", data: user})
         
     } catch (error) {
@@ -47,7 +42,7 @@ router.post("/", async(req, res) => {
     }
 
     try {
-        const user = await UsersManager.createUser({first_name, last_name, email, age, password, cart, role})
+        const user = await UsersDaoMongo.createUser({first_name, last_name, email, age, password, cart, role})
 
         res.status(200).send({status: "success", data: user})
     } catch (error) {
@@ -73,7 +68,7 @@ router.put("/:uid", async(req, res) => {
     }
 
     try {
-        const result = await UsersManager.updateUser({_id: uid}, userToUpdate)
+        const result = await UsersDaoMongo.updateUser({_id: uid}, userToUpdate)
         res.status(200).send({status: "success", data: result})
     } catch (error) {
         res.setHeader("Content-Type", "application/json")
@@ -87,7 +82,7 @@ router.put("/:uid", async(req, res) => {
 router.delete("/:uid", async(req, res) => {
     const { uid } = req.params
     try {
-        const result = await UsersManager.deleteUser(uid)
+        const result = await UsersDaoMongo.deleteUser(uid)
         res.status(200).send({status: "success", data: result})
     } catch (error) {
         res.setHeader("Content-Type", "application/json")

@@ -1,16 +1,19 @@
 import { cartsModel } from "./models/cartsModel.js"
 
-export class CartsManager{
-    static async getCarts(){
-        return await cartsModel.find().lean()
+export class CartsDaoMongo {
+    constructor(){
+        this.model = cartsModel
+    }
+    async get(){
+        return await this.model.find().lean()
     }
 
-    static async getCartsById(id) {
-        return await cartsModel.findById(id).lean()
+    async getBy(id) {
+        return await this.model.findById(id).lean()
     }
 
-    static async getProductsFromCart(cid) {
-        let cart = await cartsModel.findById(cid).populate("products.product").lean()
+    async getProductsFromCart(cid) {
+        let cart = await this.model.findById(cid).populate("products.product").lean()
 
         if (!cart){
             throw new Error("No se encontró el carrito.")
@@ -19,29 +22,29 @@ export class CartsManager{
         return cart
     }
 
-    static async createCart(products){
-        return await cartsModel.create(products)
+    async create(products){
+        return await this.model.create(products)
     }
 
-    static async addProductToCart(cid, pid){    
-        const productoEnCarrito = await cartsModel.findOne({
+    async addProduct(cid, pid){    
+        const productoEnCarrito = await this.model.findOne({
             _id: cid,
             "products.product": pid
         })
 
         if(productoEnCarrito){
-            await cartsModel.updateOne(
+            await this.model.updateOne(
                 {_id: cid, "products.product": pid},
                 {$inc: {"products.$.quantity": 1}})
         } else {
-            await cartsModel.updateOne(
+            await this.model.updateOne(
                 {_id: cid},
                 {$push: {products: {product: pid, quantity: 1}}})
         }
     }
 
-    static async deleteProductFromCart(cid, pid){
-        const productoEnCarrito = await cartsModel.findOne({
+    async deleteProduct(cid, pid){
+        const productoEnCarrito = await this.model.findOne({
             _id: cid,
             "products.product": pid
         })
@@ -50,18 +53,18 @@ export class CartsManager{
             throw new Error("El producto no existe en el carrito seleccionado")
         }
 
-        await cartsModel.updateOne(
+        await this.model.updateOne(
             {_id: cid},
             {$pull: {products: {product: pid}}})
     }
 
-    static async vaciarCarrito(cid){
-        await cartsModel.updateOne(
+    async delete(cid){
+        await this.model.updateOne(
             {_id: cid},
             {$set: {products: []}})
     }
 
-    static async actualizarCarrito(cid, products, productosDB){
+    async update(cid, products, productosDB){
         let carritoExiste = await this.getCartsById(cid)
 
         if(!carritoExiste){
@@ -86,13 +89,13 @@ export class CartsManager{
             }
         })
 
-        return await cartsModel.updateOne({_id: cid},
+        return await this.model.updateOne({_id: cid},
             {$set: { products }}
         )
     }
 
-    static async actualizarCantidad(cid, pid, quantity){
-        await cartsModel.updateOne({_id: cid, "products.product": pid},
+    async updateQuant(cid, pid, quantity){
+        await this.model.updateOne({_id: cid, "products.product": pid},
             {$set: { "products.$.quantity": quantity}}
         )
     }

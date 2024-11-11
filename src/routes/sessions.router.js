@@ -1,6 +1,6 @@
 import { Router } from "express"
 import { authentication } from "../middlewares/auth.middleware.js"
-import { UsersManager } from "../dao/UsersManager.MongoDB.js"
+import { UsersDaoMongo } from "../dao/UsersDao.MongoDB.js"
 import { createHash, isValidPassword } from "../utils/bcrypt.js"
 import passport from "passport"
 import {generateToken} from "../utils/jsonwebtoken.js"
@@ -8,11 +8,13 @@ import { passportCall } from "../utils/passport/passportCall.js"
 
 export const router = Router()
 
+const usersDaoMongo = new UsersDaoMongo()
+
 //REGISTER Y LOGIN CON PASSPORT
 
 router.post("/register", passport.authenticate("register", {failureRedirect: "/failRegister"}), async(req, res) =>{
     console.log("se registro")
-    res.send({status: "succes", message: "Registro completado."})
+    res.send({status: "success", message: "Registro completado."})
 })
 
 router.get("/failRegister", async(req, res) =>{
@@ -23,7 +25,7 @@ router.get("/failRegister", async(req, res) =>{
 router.post("/login", passport.authenticate("login" ,{failureRedirect: "/failedLogin"}), async(req, res) =>{
     if(!req.user) return res.status(401).send({error: "Credenciales invalidas."})
 
-    const userFound = await UsersManager.getUser({email: req.user.email})
+    const userFound = await usersDaoMongo.getBy({email: req.user.email})
 
     if(!userFound){
         return res.status(401).send({status: "error", error: "User not found."})
@@ -64,7 +66,7 @@ router.post("/changepass", async(req, res) => {
         return res.status(401).send({error: `Los campos email y contrañea nueva son obligatorios.`})
     }
     
-    const userFound = await UsersManager.getUser({email})
+    const userFound = await usersDaoMongo.getBy({email})
     
     if(!userFound){
         return res.status(401).send({error: `El usuario no existe.`})
@@ -73,7 +75,7 @@ router.post("/changepass", async(req, res) => {
     const passwordChanged = {password: createHash(newPassword)}
     
     try {
-        const result = await UsersManager.updateUser({email}, passwordChanged)
+        const result = await usersDaoMongo.update({email}, passwordChanged)
         res.status(200).send(`Contraseña cambiada con exito.`)
         
     } catch (error) {
