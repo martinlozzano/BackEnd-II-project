@@ -9,18 +9,20 @@ const {
     updateQuantity,
     deleteCart,
     deleteProductFromCart,
-    addProductToCart
+    addProductToCart,
+    purchase
 } = new CartController()
 
 export class CartRouter extends RouterClass {
     init(){
         this.get("/", ["PUBLIC"], getCarts)
         this.get("/:cid", ["PUBLIC"], getCartById)
-        this.post("/", ["USER"], createCart)
-        this.post("/:cid/product/:pid", ["USER"], addProductToCart)
-        this.put("/:cid", ["USER"], updateCart)
-        this.put("/:cid/product/:pid", ["USER"], updateQuantity)
-        this.delete("/:cid", ["USER"], deleteCart)
+        this.post("/", ["PUBLIC"], createCart)
+        this.post("/:cid/product/:pid", ["PUBLIC"], addProductToCart)
+        this.post("/:cid/purchase", ["PUBLIC"], purchase)
+        this.put("/:cid", ["PUBLIC"], updateCart)
+        this.put("/:cid/product/:pid", ["PUBLIC"], updateQuantity)
+        this.delete("/:cid", ["PUBLIC"], deleteCart)
         this.delete("/:cid/product/:pid", ["USER"], deleteProductFromCart)
     }
 } 

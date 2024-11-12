@@ -84,7 +84,7 @@ export class CartController {
         
         let productoEncontrado
         try {
-            productoEncontrado = await productsDaoMongo.getProductsbyId(pid)
+            productoEncontrado = await productsDaoMongo.getBy(pid)
     
             if (!productoEncontrado) {
                 res.setHeader("Content-Type", "application/json")
@@ -244,6 +244,44 @@ export class CartController {
     
             res.setHeader("Content-Type", "application/json")
             return res.status(200).json({carritoModificado})
+            
+        } catch (error) {
+            console.log(error)
+            res.setHeader("Content-Type", "application/json")
+            res.status(500).json({
+                error: `Error inesperado en el servidor.`,
+                detalle: `${error.message}`
+            })
+        }
+    }
+
+    purchase = async(req, res) => {
+        try {
+            let { cid } = req.params
+
+            if(!isValidObjectId(cid)){
+                res.setHeader("Content-Type", "application/json")
+                return res.status(400).json({error:"Formato de id inválido."})
+            }
+
+            let nuevoCarrito = []
+
+            let cart = await this.service.getCartsById(cid)
+
+            cart.products.map(prod => {
+                if(prod.product.stock >= prod.quantity){
+                    let stock_nuevo = prod.product.stock - prod.quantity
+                    productsDaoMongo.update(prod.product._id, {stock: stock_nuevo})
+                    this.service.deleteProductFromCart(cid, prod.product._id)
+                }else{
+                    nuevoCarrito.push(prod)
+                }
+            })
+
+            let ticketResponse = await fetch(`http://localhost:8080/api/tickets/${cid}`, {method:"POST"}).then(res=> res.json()).then(data => console.log(data)).catch(error=> console.log(error))
+
+            res.setHeader("Content-Type", "application/json")
+            return res.status(200).send(nuevoCarrito)
             
         } catch (error) {
             console.log(error)

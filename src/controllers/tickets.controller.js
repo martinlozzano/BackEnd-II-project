@@ -70,7 +70,15 @@ export class TicketController {
             let cart = await cartsDaoMongo.getBy({_id: cid})
             let precio_total = 0
 
-            cart.products.map(prod => precio_total += prod.product.price)
+            cart.products.map(prod => {
+                if(prod.product.stock >= prod.quantity){
+                    precio_total += prod.product.price
+                }
+            })
+
+            if(precio_total === 0){
+                return res.status(400).send({status: "error", error: "No hay en stock ningun articulo."})
+            }
     
             let newTicket = {
                 code: codigo,
